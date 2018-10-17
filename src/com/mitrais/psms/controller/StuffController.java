@@ -4,6 +4,7 @@ import java.awt.print.Book;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Optional;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
@@ -11,13 +12,14 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.mitrais.psms.dao.StuffDAO;
+import com.mitrais.psms.dao.DaoStuff;
 import com.mitrais.psms.model.Stuff;
 
 public class StuffController extends HttpServlet{
 	private static final long serialVersionUID = 1L;
-	private StuffDAO stuffDao;
-	
+	private DaoStuff stuffDao = DaoStuff.getInstance();
+
+	/*
 	public void init() {
 		String jdbcURL = getServletContext().getInitParameter("jdbcURL");
 		String jdbcUsername = getServletContext().getInitParameter("jdbcUsername");
@@ -25,7 +27,7 @@ public class StuffController extends HttpServlet{
 
 		stuffDao = new StuffDAO(jdbcURL, jdbcUsername, jdbcPassword);
 	}
-	
+	*/
 	@Override
 	protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		doGet(req, resp);
@@ -71,16 +73,16 @@ public class StuffController extends HttpServlet{
 		String location = req.getParameter("location");
 		
 		Stuff stuff = new Stuff(id, name, description, quantity, location);
-		stuffDao.updateStuff(stuff);
+		stuffDao.update(stuff);
 		resp.sendRedirect("list");
 	}
 
 	private void showEditForm(HttpServletRequest req, HttpServletResponse resp) 
 	throws SQLException, IOException, ServletException{
-		int id = Integer.parseInt(req.getParameter("id"));
-		Stuff existingStuff = stuffDao.getStuff(id);
+		String id = req.getParameter("id");
+		Optional<Stuff> existingStuff = stuffDao.find(id);
 		RequestDispatcher dispatcher = req.getRequestDispatcher("jsp/StuffForm.jsp");
-		req.setAttribute("stuff", existingStuff);
+		req.setAttribute("stuff", existingStuff.orElse(null));
 		dispatcher.forward(req, resp);
 	}
 
@@ -89,7 +91,7 @@ public class StuffController extends HttpServlet{
 		int id = Integer.parseInt(req.getParameter("id"));
 		
 		Stuff stuff = new Stuff(id);
-		stuffDao.deleteStuff(stuff);
+		stuffDao.delete(stuff);
 		resp.sendRedirect("list");
 	}
 
@@ -101,7 +103,7 @@ public class StuffController extends HttpServlet{
 		String location = req.getParameter("location");
 		
 		Stuff newStuff = new Stuff(name, description, quantity, location);
-		stuffDao.insertStuff(newStuff);
+		stuffDao.save(newStuff);
 		resp.sendRedirect("list");		
 	}
 
@@ -113,9 +115,11 @@ public class StuffController extends HttpServlet{
 
 	private void listStuff(HttpServletRequest req, HttpServletResponse resp) 
 	throws SQLException, IOException, ServletException{
-		List<Stuff> listStuff = stuffDao.listAllStuff();
-		req.setAttribute("listStuff", listStuff);
 		RequestDispatcher dispatcher = req.getRequestDispatcher("jsp/StuffList.jsp");
+		
+		List<Stuff> listStuff = stuffDao.findAll();
+		req.setAttribute("listStuff", listStuff);
+		
 		dispatcher.forward(req, resp);
 	}
 }
