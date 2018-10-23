@@ -30,9 +30,8 @@ public class DaoStuff implements StuffDao{
 	
 	@Override
 	public Optional<Stuff> find(String id) throws SQLException {
-		// TODO Auto-generated method stub
 		//Stuff stuff = null;
-		String sql = "SELECT * FROM stuff WHERE stuff_id = ?";
+		String sql = "SELECT stuff_id,name,description,quantity,location FROM stuff WHERE stuff_id = ?";
 		try (Connection conn = DataSourceFactory.getConnection()) {
 			PreparedStatement statement = conn.prepareStatement(sql);
 			statement.setString(1, id);
@@ -52,7 +51,6 @@ public class DaoStuff implements StuffDao{
 			
 			
 		} catch (SQLException e) {
-			// TODO: handle exception
 			e.printStackTrace();
 			throw e;
 		}
@@ -61,9 +59,8 @@ public class DaoStuff implements StuffDao{
 
 	@Override
 	public List<Stuff> findAll() throws SQLException {
-		// TODO Auto-generated method stub
 		List<Stuff> listStuff = new ArrayList<>();		
-		String sql = "SELECT * FROM stuff";
+		String sql = "SELECT stuff_id,name,description,quantity,location FROM stuff";
 		
 		try (Connection conn = DataSourceFactory.getConnection()) {
 			Statement statement = conn.createStatement();
@@ -81,7 +78,6 @@ public class DaoStuff implements StuffDao{
 			}
 			
 		} catch (SQLException e) {
-			// TODO: handle exception
 			e.printStackTrace();
 			throw e;
 		}
@@ -91,7 +87,7 @@ public class DaoStuff implements StuffDao{
 
 	@Override
 	public boolean save(Stuff stuff) throws SQLException {
-		// TODO Auto-generated method stub
+		
 		String sql ="INSERT into stuff (name, description, quantity, location) VALUES (?, ?, ?, ?)";
 		boolean rowInserted=false;
 		try (Connection conn = DataSourceFactory.getConnection()) {
@@ -102,15 +98,15 @@ public class DaoStuff implements StuffDao{
 			statement.setString(4, stuff.getLocation());
 			
 			rowInserted = statement.executeUpdate() > 0;
-		} catch (Exception e) {
-			// TODO: handle exception
+		} catch (SQLException e) {
+			System.out.println("Error SQL");
+			e.printStackTrace();		
 		}
 		return rowInserted;
 	}
 
 	@Override
 	public boolean update(Stuff stuff) throws SQLException {
-		// TODO Auto-generated method stub
 		String sql = "UPDATE stuff SET name = ?, description = ?, quantity = ?, location = ?";
 		sql +=" WHERE stuff_id = ?";
 		boolean rowUpdateted = false;
@@ -124,7 +120,6 @@ public class DaoStuff implements StuffDao{
 			
 			rowUpdateted = statement.executeUpdate() > 0;
 		} catch (SQLException e) {
-			// TODO: handle exception
 			e.printStackTrace();
 			throw e;
 		}
@@ -133,7 +128,7 @@ public class DaoStuff implements StuffDao{
 
 	@Override
 	public boolean delete(Stuff stuff) throws SQLException {
-		// TODO Auto-generated method stub
+
 		String sql = "DELETE FROM stuff where stuff_id = ?";
 		boolean rowDeleted = false;
 		
@@ -143,7 +138,6 @@ public class DaoStuff implements StuffDao{
 			
 			rowDeleted = statement.executeUpdate() > 0;
 		} catch (SQLException e) {
-			// TODO: handle exception
 			e.printStackTrace();
 			throw e;
 		}

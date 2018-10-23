@@ -16,20 +16,16 @@
 						<div
 							class="mdl-card__title mdl-color--primary mdl-color-text--white">
 							<h2 class="mdl-card__title-text">
-								<c:if test="${stuff != null}">
-                        Edit Stuff
-                    </c:if>
-								<c:if test="${stuff == null}">
-                        Add New Stuff
-                    </c:if>
+								<c:if test="${stuff != null}">Edit Stuff</c:if>
+								<c:if test="${stuff == null}">Add New Stuff</c:if>
 							</h2>
 						</div>
 						<div class="mdl-card__supporting-text">
 							<c:if test="${stuff != null}">
-								<form action="update" method="post">
+								<form name="myForm" action="update" method="post" onsubmit="return validateForm()">
 							</c:if>
 							<c:if test="${stuff == null}">
-								<form action="insert" method="post">
+								<form name="myForm" action="insert" method="post" onsubmit="return validateForm()">
 							</c:if>
 							<c:if test="${stuff != null}">
 								<input type="hidden" name="id"
@@ -50,8 +46,17 @@
 							</div>
 
 							<div class="mdl-textfield mdl-js-textfield">
-								<input class="mdl-textfield__input" type="text" name="quantity"
-									value="<c:out value='${stuff.quantity}' />" id="quantity" /> <label
+							
+							<c:choose>
+							<c:when test = "${stuff != null }"> 
+							<input class="mdl-textfield__input" type="text" name="quantity" value="<c:out value='${stuff.quantity}' />" id="quantity" />
+							</c:when>
+							<c:otherwise>
+							<input class="mdl-textfield__input" type="text" name="quantity" value="<c:out value='1' />" id="quantity" />
+							</c:otherwise>
+							</c:choose>
+							
+								 <label
 									class="mdl-textfield__label" for="quantity">Quantity</label>
 							</div>
 
@@ -72,6 +77,15 @@
 		</div>
 		</main>
 	</div>
+	<script type="text/javascript">
+	function validateForm() {
+	    var x = document.forms["myForm"]["quantity"].value;
+	    if (x == "") {
+	        alert("Quantity must be filled out");
+	        return false;
+	    }
+	}
+	</script>
 </body>
 </html>
 
