@@ -18,16 +18,6 @@ import com.mitrais.psms.model.Stuff;
 public class StuffController extends HttpServlet{
 	private static final long serialVersionUID = 1L;
 	private DaoStuff stuffDao = DaoStuff.getInstance();
-
-	/*
-	public void init() {
-		String jdbcURL = getServletContext().getInitParameter("jdbcURL");
-		String jdbcUsername = getServletContext().getInitParameter("jdbcUsername");
-		String jdbcPassword = "";
-
-		stuffDao = new StuffDAO(jdbcURL, jdbcUsername, jdbcPassword);
-	}
-	*/
 	@Override
 	protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		doGet(req, resp);
@@ -82,7 +72,7 @@ public class StuffController extends HttpServlet{
 		String id = req.getParameter("id");
 		Optional<Stuff> existingStuff = stuffDao.find(id);
 		RequestDispatcher dispatcher = req.getRequestDispatcher("jsp/StuffForm.jsp");
-		req.setAttribute("stuff", existingStuff.orElse(null));
+		existingStuff.ifPresent(s->req.setAttribute("stuff", s));
 		dispatcher.forward(req, resp);
 	}
 

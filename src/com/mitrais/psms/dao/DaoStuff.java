@@ -1,5 +1,4 @@
 package com.mitrais.psms.dao;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -8,17 +7,16 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-
-import javax.xml.datatype.DatatypeFactory;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.mitrais.psms.dao.core.DataSourceFactory;
 import com.mitrais.psms.dao.core.StuffDao;
 import com.mitrais.psms.model.Stuff;
 
 public class DaoStuff implements StuffDao{
-	
-	private DaoStuff() {}
-	
+	private static final Logger LOGGER = Logger.getLogger(StuffDao.class.getName());
+	private DaoStuff() {}	
 	private static class SingletonHelper
 	{
 		private static final DaoStuff INSTANCE = new DaoStuff();
@@ -27,34 +25,38 @@ public class DaoStuff implements StuffDao{
 	public static DaoStuff getInstance() {
 		return SingletonHelper.INSTANCE;
 	}
-	
 	@Override
 	public Optional<Stuff> find(String id) throws SQLException {
-		//Stuff stuff = null;
+
 		String sql = "SELECT stuff_id,name,description,quantity,location FROM stuff WHERE stuff_id = ?";
+		int id_stuff = 0,quantity=0;
+		String name = "",description="",location="";
 		try (Connection conn = DataSourceFactory.getConnection()) {
 			PreparedStatement statement = conn.prepareStatement(sql);
 			statement.setString(1, id);
-			
 			ResultSet resultSet = statement.executeQuery();
 			
 			if (resultSet.next()) {
-				int id_stuff = resultSet.getInt("stuff_id");
-				String name = resultSet.getString("name");
-				String description = resultSet.getString("description");
-				int quantity = resultSet.getInt("quantity");
-				String location = resultSet.getString("location");
-				
-				Stuff stuff = new Stuff(id_stuff, name, description, quantity, location);
-			return Optional.of(stuff);
+				id_stuff = resultSet.getInt("stuff_id");
+				name = resultSet.getString("name");
+				description = resultSet.getString("description");
+				quantity = resultSet.getInt("quantity");
+				location = resultSet.getString("location");
 			}
-			
-			
-		} catch (SQLException e) {
-			e.printStackTrace();
+		} 
+		// Exception occurs when database access error or other errors
+		catch (SQLException e) {
+			LOGGER.log(Level.SEVERE, "Connection Failed!", e);
 			throw e;
 		}
-		return Optional.empty();
+		
+		try {
+			return Optional.of(new Stuff(id_stuff, name, description, quantity, location));
+		} 
+		// Exception occurs when Optional error
+		catch (Exception e) {
+			return Optional.empty();
+		}
 	}
 
 	@Override
@@ -77,8 +79,10 @@ public class DaoStuff implements StuffDao{
 				listStuff.add(stuff);
 			}
 			
-		} catch (SQLException e) {
-			e.printStackTrace();
+		} 
+		// Exception occurs when database access error or other errors
+		catch (SQLException e) {
+			LOGGER.log(Level.SEVERE, "Connection Failed!", e);
 			throw e;
 		}
 		
@@ -98,9 +102,11 @@ public class DaoStuff implements StuffDao{
 			statement.setString(4, stuff.getLocation());
 			
 			rowInserted = statement.executeUpdate() > 0;
-		} catch (SQLException e) {
-			System.out.println("Error SQL");
-			e.printStackTrace();		
+		} 
+		// Exception occurs when database access error or other errors
+		catch (SQLException e) {
+			LOGGER.log(Level.SEVERE, "Connection Failed!", e);
+			throw e;
 		}
 		return rowInserted;
 	}
@@ -119,8 +125,10 @@ public class DaoStuff implements StuffDao{
 			statement.setInt(5, stuff.getId());
 			
 			rowUpdateted = statement.executeUpdate() > 0;
-		} catch (SQLException e) {
-			e.printStackTrace();
+		} 
+		// Exception occurs when database access error or other errors
+		catch (SQLException e) {
+			LOGGER.log(Level.SEVERE, "Connection Failed!", e);
 			throw e;
 		}
 		return rowUpdateted;
@@ -137,8 +145,10 @@ public class DaoStuff implements StuffDao{
 			statement.setInt(1, stuff.getId());
 			
 			rowDeleted = statement.executeUpdate() > 0;
-		} catch (SQLException e) {
-			e.printStackTrace();
+		} 
+		// Exception occurs when database access error or other errors
+		catch (SQLException e) {
+			LOGGER.log(Level.SEVERE, "Connection Failed!", e);
 			throw e;
 		}
 		
