@@ -23,28 +23,28 @@ public class DataSourceFactory {
     {
         MysqlDataSource daso = new MysqlDataSource();
         String rootPath =
-                Objects.requireNonNull(Thread.currentThread().getContextClassLoader().getResource("database.properties")).getPath();
-        
+                Objects.requireNonNull(Thread.currentThread().getContextClassLoader().getResource("database.properties")).getPath();        
         InputStream input = null;
         
         try {
         	input = new FileInputStream(rootPath);
             Properties prop = new Properties();
             prop.load(input);
-
             daso.setDatabaseName(prop.getProperty("database"));
             daso.setServerName(prop.getProperty("serverName"));
             daso.setPort(Integer.parseInt(prop.getProperty("port")));
             daso.setUser(prop.getProperty("user"));
             daso.setPassword(prop.getProperty("password"));
-
         }
+        
         // Exception occurs when file database.properties not found 
         catch (FileNotFoundException e) {
+        	// For simplicity just Log  the Exceptions
         	LOGGER.log(Level.SEVERE, "File database.properties Not Found",e);
         } 
         // Exception occurs when I/O error
         catch (IOException e) {
+        	// For simplicity just Log  the Exceptions
         	LOGGER.log(Level.SEVERE, "IO Error",e);
         } finally {
 			if (input !=null) {
@@ -53,14 +53,13 @@ public class DataSourceFactory {
 				} 
 				// Exception occurs when failed to close input streams
 				catch (IOException e) {
+					// For simplicity just Log  the Exceptions
 					LOGGER.log(Level.SEVERE, "Failed to close streams",e);
 				}
 			}
 		}
-
         this.daso = daso;
     }
-
     
     public static Connection getConnection() throws SQLException
     {

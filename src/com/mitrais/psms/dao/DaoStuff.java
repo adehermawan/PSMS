@@ -1,4 +1,5 @@
 package com.mitrais.psms.dao;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -7,130 +8,96 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import com.mitrais.psms.dao.core.DataSourceFactory;
 import com.mitrais.psms.dao.core.StuffDao;
 import com.mitrais.psms.model.Stuff;
 
-public class DaoStuff implements StuffDao{
-	private static final Logger LOGGER = Logger.getLogger(StuffDao.class.getName());
-	private DaoStuff() {}	
-	private static class SingletonHelper
-	{
+public class DaoStuff implements StuffDao {
+	private DaoStuff() {
+	}
+
+	private static class SingletonHelper {
 		private static final DaoStuff INSTANCE = new DaoStuff();
 	}
-	
+
 	public static DaoStuff getInstance() {
 		return SingletonHelper.INSTANCE;
 	}
+
 	@Override
 	public Optional<Stuff> find(String id) throws SQLException {
 
 		String sql = "SELECT stuff_id,name,description,quantity,location FROM stuff WHERE stuff_id = ?";
-		int id_stuff = 0,quantity=0;
-		String name = "",description="",location="";
-		try (Connection conn = DataSourceFactory.getConnection()) {
-			PreparedStatement statement = conn.prepareStatement(sql);
-			statement.setString(1, id);
-			ResultSet resultSet = statement.executeQuery();
-			
-			if (resultSet.next()) {
-				id_stuff = resultSet.getInt("stuff_id");
-				name = resultSet.getString("name");
-				description = resultSet.getString("description");
-				quantity = resultSet.getInt("quantity");
-				location = resultSet.getString("location");
-			}
-		} 
-		// Exception occurs when database access error or other errors
-		catch (SQLException e) {
-			LOGGER.log(Level.SEVERE, "Connection Failed!", e);
-			throw e;
+		int id_stuff = 0, quantity = 0;
+		String name = "", description = "", location = "";
+		Connection conn = DataSourceFactory.getConnection();
+
+		PreparedStatement statement = conn.prepareStatement(sql);
+		statement.setString(1, id);
+		ResultSet resultSet = statement.executeQuery();
+
+		if (resultSet.next()) {
+			id_stuff = resultSet.getInt("stuff_id");
+			name = resultSet.getString("name");
+			description = resultSet.getString("description");
+			quantity = resultSet.getInt("quantity");
+			location = resultSet.getString("location");
 		}
-		
-		try {
-			return Optional.of(new Stuff(id_stuff, name, description, quantity, location));
-		} 
-		// Exception occurs when Optional error
-		catch (Exception e) {
-			return Optional.empty();
-		}
+		return Optional.of(new Stuff(id_stuff, name, description, quantity, location));
 	}
 
 	@Override
 	public List<Stuff> findAll() throws SQLException {
-		List<Stuff> listStuff = new ArrayList<>();		
+		List<Stuff> listStuff = new ArrayList<>();
 		String sql = "SELECT stuff_id,name,description,quantity,location FROM stuff";
-		
-		try (Connection conn = DataSourceFactory.getConnection()) {
-			Statement statement = conn.createStatement();
-			ResultSet resultSet = statement.executeQuery(sql);
-			
-			while (resultSet.next()) {
-				int id = resultSet.getInt("stuff_id");
-				String name = resultSet.getString("name");
-				String description = resultSet.getString("description");
-				int quantity = resultSet.getInt("quantity");
-				String location = resultSet.getString("location");
-				
-				Stuff stuff = new Stuff(id,name, description, quantity, location);
-				listStuff.add(stuff);
-			}
-			
-		} 
-		// Exception occurs when database access error or other errors
-		catch (SQLException e) {
-			LOGGER.log(Level.SEVERE, "Connection Failed!", e);
-			throw e;
+
+		Connection conn = DataSourceFactory.getConnection();
+		Statement statement = conn.createStatement();
+		ResultSet resultSet = statement.executeQuery(sql);
+
+		while (resultSet.next()) {
+			int id = resultSet.getInt("stuff_id");
+			String name = resultSet.getString("name");
+			String description = resultSet.getString("description");
+			int quantity = resultSet.getInt("quantity");
+			String location = resultSet.getString("location");
+
+			Stuff stuff = new Stuff(id, name, description, quantity, location);
+			listStuff.add(stuff);
 		}
-		
+
 		return listStuff;
 	}
 
 	@Override
 	public boolean save(Stuff stuff) throws SQLException {
-		
-		String sql ="INSERT into stuff (name, description, quantity, location) VALUES (?, ?, ?, ?)";
-		boolean rowInserted=false;
-		try (Connection conn = DataSourceFactory.getConnection()) {
+
+		String sql = "INSERT into stuff (name, description, quantity, location) VALUES (?, ?, ?, ?)";
+		boolean rowInserted = false;
+		Connection conn = DataSourceFactory.getConnection();
 			PreparedStatement statement = conn.prepareStatement(sql);
 			statement.setString(1, stuff.getName());
 			statement.setString(2, stuff.getDescription());
 			statement.setInt(3, stuff.getQuantity());
 			statement.setString(4, stuff.getLocation());
-			
 			rowInserted = statement.executeUpdate() > 0;
-		} 
-		// Exception occurs when database access error or other errors
-		catch (SQLException e) {
-			LOGGER.log(Level.SEVERE, "Connection Failed!", e);
-			throw e;
-		}
 		return rowInserted;
 	}
 
 	@Override
 	public boolean update(Stuff stuff) throws SQLException {
 		String sql = "UPDATE stuff SET name = ?, description = ?, quantity = ?, location = ?";
-		sql +=" WHERE stuff_id = ?";
+		sql += " WHERE stuff_id = ?";
 		boolean rowUpdateted = false;
-		try (Connection conn = DataSourceFactory.getConnection()) {
+		Connection conn = DataSourceFactory.getConnection();
 			PreparedStatement statement = conn.prepareStatement(sql);
 			statement.setString(1, stuff.getName());
 			statement.setString(2, stuff.getDescription());
 			statement.setInt(3, stuff.getQuantity());
 			statement.setString(4, stuff.getLocation());
 			statement.setInt(5, stuff.getId());
-			
 			rowUpdateted = statement.executeUpdate() > 0;
-		} 
-		// Exception occurs when database access error or other errors
-		catch (SQLException e) {
-			LOGGER.log(Level.SEVERE, "Connection Failed!", e);
-			throw e;
-		}
+
 		return rowUpdateted;
 	}
 
@@ -139,19 +106,12 @@ public class DaoStuff implements StuffDao{
 
 		String sql = "DELETE FROM stuff where stuff_id = ?";
 		boolean rowDeleted = false;
-		
-		try (Connection conn = DataSourceFactory.getConnection()) {
+
+		Connection conn = DataSourceFactory.getConnection();
 			PreparedStatement statement = conn.prepareStatement(sql);
 			statement.setInt(1, stuff.getId());
-			
 			rowDeleted = statement.executeUpdate() > 0;
-		} 
-		// Exception occurs when database access error or other errors
-		catch (SQLException e) {
-			LOGGER.log(Level.SEVERE, "Connection Failed!", e);
-			throw e;
-		}
-		
+
 		return rowDeleted;
 	}
 

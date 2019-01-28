@@ -1,10 +1,11 @@
 package com.mitrais.psms.controller;
 
-import java.awt.print.Book;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
@@ -18,16 +19,16 @@ import com.mitrais.psms.model.Stuff;
 public class StuffController extends HttpServlet{
 	private static final long serialVersionUID = 1L;
 	private DaoStuff stuffDao = DaoStuff.getInstance();
+	private static final Logger LOGGER = Logger.getLogger(StuffController.class.getName());
 	@Override
 	protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		doGet(req, resp);
 	}
 	
 	@Override
-	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException{
 		
 		String action = req.getServletPath();
-		
 		try {
 			switch (action) {
 			case "/new":
@@ -48,10 +49,13 @@ public class StuffController extends HttpServlet{
 			default:
 				listStuff(req,resp);
 				break;
-			}
-		} catch (SQLException ex) {
-			throw new ServletException(ex);
+			}			
+		} catch (SQLException e) {
+			// For simplicity just Log  the Exceptions
+			LOGGER.log(Level.SEVERE, "SQL Error", e);
 		}
+
+		
 	}
 
 	private void updateStuff(HttpServletRequest req, HttpServletResponse resp) 
